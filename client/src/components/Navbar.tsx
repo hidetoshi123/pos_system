@@ -80,7 +80,7 @@ const Navbar = () => {
             className="navbar-brand mb-0"
             style={{ color: "#fff", fontWeight: "bold", letterSpacing: "1px", fontSize: "1.8rem" }}
           >
-            POS_SYSTEM
+            TechFour
           </span>
         </div>
 

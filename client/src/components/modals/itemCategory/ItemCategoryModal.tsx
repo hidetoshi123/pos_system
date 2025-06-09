@@ -1,5 +1,4 @@
 import { useState } from "react";
-import SpinnerSmall from "../../SpinnerSmall";
 import CategoryContent from "../../forms/categories/CategoryContent";
 
 interface AddItemCategoryModalProps {
@@ -27,7 +26,6 @@ const AddItemCategory = ({
     setIsSuccess(isSuccess);
     setIsVisible(isVisible);
   };
-
 
   const handleCategoryAdded = (msg: string) => {
     handleShowAlertMessage(msg, true, true);
@@ -66,19 +64,6 @@ const AddItemCategory = ({
                 disabled={loadingStore}
               >
                 Close
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loadingStore}
-              >
-                {loadingStore ? (
-                  <>
-                    <SpinnerSmall /> Saving Item...
-                  </>
-                ) : (
-                  "Save Item"
-                )}
               </button>
             </div>
           </div>

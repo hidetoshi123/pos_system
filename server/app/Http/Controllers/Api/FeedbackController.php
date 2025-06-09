@@ -11,11 +11,11 @@ class FeedbackController extends Controller
     public function getResponses()
     {
         $client = new Client();
-        $client->setAuthConfig(storage_path('app/posSystemSheets.json')); // Your service account JSON
+        $client->setAuthConfig(storage_path('app/GsheetsKey.json')); // Your service account JSON
         $client->addScope(Sheets::SPREADSHEETS_READONLY);
 
         $service = new Sheets($client);
-        $spreadsheetId = '1Cqk8-_HVKM1cZl_p46wPaELCz-UKZ1S6-V42682sofc'; // Your Google Sheet ID
+        $spreadsheetId = '1lf77YXjgwJ2Z83tYQPvDjrUc_hZrU7FSOybcnQIKkkk'; // Your Google Sheet ID
         $range = "Form Responses 1!A1:Z1000"; // Adjust as needed
 
         $response = $service->spreadsheets_values->get($spreadsheetId, $range);
@@ -29,74 +29,70 @@ class FeedbackController extends Controller
         return response()->json([
             'questions' => [
                 [
-                    'text' => 'How easy was it to complete your transaction using our POS system?',
+                    'text' => 'The POS system is easy to use and user-friendly.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very Easy', 'Easy', 'Neutral', 'Difficult', 'Very Difficult']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How easy was it to navigate the POS screen or menu?',
+                    'text' => 'The system responds quickly without significant delays.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very Easy', 'Easy', 'Neutral', 'Difficult', 'Very Difficult']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How satisfied were you with the speed of the checkout?',
+                    'text' => 'It is easy to train new staff to use the POS system.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How smooth was the payment process?',
+                    'text' => 'The POS system helps improve our transaction accuracy.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Excellent', 'Good', 'Neutral', 'Poor', 'Very Poor']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How well did the POS system support your preferred payment method?',
+                    'text' => 'I am satisfied with the reliability and stability of the system.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Completely', 'Mostly', 'Moderately', 'Slightly', 'Not at all']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'Did you experience any technical issues during the transaction?',
+                    'text' => 'The features of the POS system meet the needs of our business.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Perfect experience', 'No issues', 'A few minor issues', 'Some issues', 'Many issues']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How clear and understandable was the on-screen information?',
+                    'text' => 'The system integrates well with our inventory and reporting tools.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very clear', 'Clear', 'Neutral', 'Unclear', 'Very unclear']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How confident were you in reviewing your order details before payment?',
+                    'text' => 'Customer transactions are processed efficiently using the POS.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Completely confident', 'Very confident', 'Moderately confident', 'Slightly confident', 'Not confident at all']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How accurately did the POS system display your total amount?',
+                    'text' => 'Technical support is responsive and helpful when issues arise.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very accurate', 'Accurate', 'Neutral', 'Inaccurate', 'Very inaccurate']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How satisfied were you with the promptness and accuracy of your receipt?',
+                    'text' => 'I would recommend this POS system to other businesses.',
                     'type' => 'multiple-choice',
-                    'choices' => ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied', 'Very Dissatisfied']
+                    'choices' => ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
                 ],
                 [
-                    'text' => 'How helpful was the customer-facing screen during checkout?',
-                    'type' => 'multiple-choice',
-                    'choices' => ['Extremely helpful', 'Very helpful', 'Moderately helpful', 'Slightly helpful', 'Not helpful at all']
-                ],
-                [
-                    'text' => 'In your opinion, What possible improvements can be implemented in the system?',
-                    'type' => 'open-ended'
+                    'text' => 'What suggestions do you have for improving the POS system to better serve your needs?',
+                    'type' => 'text'
                 ]
             ]
+
         ]);
     }
     public function getAggregatedResponses()
     {
         $client = new Client();
-        $client->setAuthConfig(storage_path('app/posSystemSheets.json'));
+        $client->setAuthConfig(storage_path('app/GsheetsKey.json'));
         $client->addScope(Sheets::SPREADSHEETS_READONLY);
         $service = new Sheets($client);
-        $spreadsheetId = '1Cqk8-_HVKM1cZl_p46wPaELCz-UKZ1S6-V42682sofc';
+        $spreadsheetId = '1lf77YXjgwJ2Z83tYQPvDjrUc_hZrU7FSOybcnQIKkkk';
         $range = "Form Responses 1!A1:Z1000";
 
         $response = $service->spreadsheets_values->get($spreadsheetId, $range);

@@ -16,7 +16,6 @@ interface SummaryData {
 }
 
 const surveyQuestions: { [question: string]: string[] } = {
-  // (same questions as your original)
   "How easy was it to complete your transaction using our POS system?": [
     "Very Easy",
     "Easy",
@@ -24,7 +23,6 @@ const surveyQuestions: { [question: string]: string[] } = {
     "Difficult",
     "Very Difficult",
   ],
-  // ... (include the rest unchanged)
 };
 
 const COLORS = [
@@ -138,7 +136,9 @@ const SurveyCharts: React.FC = () => {
                         />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [`${value}`, "Count"]} />
+                    <Tooltip
+                      formatter={(value: number) => [`${value}`, "Count"]}
+                    />
                     <Legend
                       layout="horizontal"
                       verticalAlign="bottom"

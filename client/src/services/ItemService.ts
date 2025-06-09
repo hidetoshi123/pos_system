@@ -1,13 +1,15 @@
-import AxiosInstance from "../AxiosInstance"
+import AxiosInstance from "../AxiosInstance";
 
 const ItemService = {
-  loadItems: async () => {
-    return AxiosInstance.get("/loadItems")
+  loadItems: async ({ page = 1 }) => {
+    return AxiosInstance.get("/loadItems", {
+      params: { page },
+    })
       .then((response) => response)
       .catch((error) => {
-        throw error
-      })
-  },
+        throw error;
+      });
+  },  
 
   storeItem: async (data: FormData) => {
     return AxiosInstance.post("/storeItem", data, {
@@ -17,40 +19,40 @@ const ItemService = {
     })
       .then((response) => response)
       .catch((error) => {
-        throw error
-      })
+        throw error;
+      });
   },
 
   updateItem: async (itemId: number, data: FormData) => {
-    console.log("Updating item:", itemId)
-    console.log("FormData entries:")
+    console.log("Updating item:", itemId);
+    console.log("FormData entries:");
     for (const [key, value] of data.entries()) {
-      console.log(key, value)
+      console.log(key, value);
     }
 
-    // Changed from PUT to POST to match UserService pattern
     return AxiosInstance.post(`/updateItem/${itemId}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     })
       .then((response) => {
-        console.log("Update response:", response)
-        return response
+        console.log("Update response:", response);
+        return response;
       })
       .catch((error) => {
-        console.error("Update error:", error.response?.data || error.message)
-        throw error
-      })
+        console.error("Update error:", error.response?.data || error.message);
+        throw error;
+      });
   },
 
   destroyItem: async (ItemId: number) => {
     return AxiosInstance.delete(`/destroyItem/${ItemId}`)
       .then((response) => response)
       .catch((error) => {
-        throw error
-      })
+        throw error;
+      });
   },
-}
+};
 
-export default ItemService
+export default ItemService;
+

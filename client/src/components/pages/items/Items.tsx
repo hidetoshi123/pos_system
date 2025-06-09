@@ -12,21 +12,33 @@ import ErrorHandler from "../../handler/ErrorHandler";
 const ItemsPage = () => {
   const [refreshItems, setRefreshItems] = useState(false);
   const [items, setItems] = useState<Items[]>([]);
-  const [loadingItems, setLoadingItems] = useState(true);
+  const [loadingItems, setLoadingItems] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const [selectedItem, setSelectedItem] = useState<Items | null>(null);
   const [openAddItemModal, setOpenAddItemModal] = useState(false);
   const [openEditItemModal, setOpenEditItemModal] = useState(false);
   const [openDeleteItemModal, setOpenDeleteItemModal] = useState(false);
 
-  const loadItems = () => {
+  const loadItems = (currentPage: number = 1) => {
     setLoadingItems(true);
-    ItemService.loadItems()
+    ItemService.loadItems({ page: currentPage })
       .then((res) => {
         if (res.status === 200) {
-          setItems(res.data.items);
+          const newItems = res.data.data;
+
+          setItems((prevItems) =>
+            currentPage === 1 ? newItems : [...prevItems, ...newItems]
+          );
+
+          setHasMore(newItems.length >= 10);
         } else {
-          console.error("Unexpected status error while loading items:", res.status);
+          console.error(
+            "Unexpected status error while loading items:",
+            res.status
+          );
         }
       })
       .catch((error) => {
@@ -38,8 +50,15 @@ const ItemsPage = () => {
   };
 
   useEffect(() => {
-    loadItems();
+    setPage(1);
+    loadItems(1);
   }, [refreshItems]);
+
+  const loadMoreItems = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    loadItems(nextPage);
+  };
 
   const handleOpenEditItemModal = (item: Items) => {
     setSelectedItem(item);
@@ -111,7 +130,9 @@ const ItemsPage = () => {
             justifyContent: "flex-start",
           }}
         >
-          <h5 style={{ fontSize: "1.1rem", marginBottom: 16, fontWeight: 600 }}>🔔 Stock Alerts</h5>
+          <h5 style={{ fontSize: "1.1rem", marginBottom: 16, fontWeight: 600 }}>
+            🔔 Stock Alerts
+          </h5>
           <ItemAlert lowStockItems={lowStockItems} loading={loadingItems} />
         </div>
 
@@ -120,6 +141,8 @@ const ItemsPage = () => {
           <ItemsTable
             loadingItems={loadingItems}
             items={items}
+            hasMore={hasMore}
+            loadMoreItems={loadMoreItems}
             onEditItem={handleOpenEditItemModal}
             onDeleteItem={handleOpenDeleteItemModal}
           />

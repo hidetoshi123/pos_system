@@ -30,29 +30,39 @@ const ProductsTable = ({
   const [filters, setFilters] = useState({
     search: "",
     category: "",
-    sort: "", // 'price_asc', 'price_desc'
+    sort: "",
   });
 
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const selectedItemRef = useRef<HTMLDivElement | null>(null);
 
-  // Load items and categories
-  const handleLoadItems = () => {
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const handleLoadItems = (currentPage = 1) => {
     setState((prev) => ({ ...prev, loadingItems: true }));
 
     Promise.all([
-      ItemService.loadItems(),
+      ItemService.loadItems({ page: currentPage }),
       ItemCategoryServices.loadCategories(),
     ])
       .then(([itemsRes, categoriesRes]) => {
         if (itemsRes.status === 200 && categoriesRes.status === 200) {
+          const newItems = itemsRes.data.data;
+          const totalPages = itemsRes.data.last_page;
+
           setState((prev) => ({
             ...prev,
-            items: itemsRes.data.items,
+            items: currentPage === 1 ? newItems : [...prev.items, ...newItems],
             categories: categoriesRes.data.categories,
-            filteredItems: itemsRes.data.items,
+            filteredItems:
+              currentPage === 1
+                ? newItems
+                : [...prev.filteredItems, ...newItems],
             loadingItems: false,
           }));
+
+          setHasMore(currentPage < totalPages);
         } else {
           console.error("Failed to load items or categories");
           setState((prev) => ({ ...prev, loadingItems: false }));
@@ -64,38 +74,38 @@ const ProductsTable = ({
       });
   };
 
+  // Load more button
+  const loadMoreItems = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    handleLoadItems(nextPage);
+  };
+
   useEffect(() => {
-    handleLoadItems();
+    setPage(1);
+    handleLoadItems(1);
   }, [refreshItems]);
 
-  // Filter and sort items whenever filters or items change
   useEffect(() => {
     let filtered = [...state.items];
 
-    // Search filter
     if (filters.search.trim() !== "") {
       filtered = filtered.filter((item) =>
         item.item_name.toLowerCase().includes(filters.search.toLowerCase())
       );
     }
 
-    // Category filter (fixed here!)
     if (filters.category !== "") {
       filtered = filtered.filter(
         (item) => item.category?.category_id?.toString() === filters.category
       );
     }
 
-    // Sort filter (fixed here!)
     if (filters.sort === "price_asc") {
       filtered.sort((a, b) => Number(a.item_price) - Number(b.item_price));
     } else if (filters.sort === "price_desc") {
       filtered.sort((a, b) => Number(b.item_price) - Number(a.item_price));
     }
-
-    // Debugging — optional
-    console.log("Filters:", filters);
-    console.log("Filtered Items:", filtered);
 
     setState((prev) => ({ ...prev, filteredItems: filtered }));
   }, [filters, state.items]);
@@ -108,6 +118,8 @@ const ProductsTable = ({
       ...prev,
       [name]: value,
     }));
+
+    setPage(1);
   };
 
   const resetFilters = () => {
@@ -116,6 +128,8 @@ const ProductsTable = ({
       category: "",
       sort: "",
     });
+
+    setPage(1);
   };
 
   useEffect(() => {
@@ -207,65 +221,80 @@ const ProductsTable = ({
             padding: 24,
           }}
         >
-          {state.loadingItems ? (
+          {state.loadingItems && state.items.length === 0 ? (
             <div className="py-3 text-center">
               <Spinner />
             </div>
           ) : state.filteredItems.length > 0 ? (
-            <div className="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4 py-3">
-              {state.filteredItems.map((item) => (
-                <div className="col" key={item.item_id}>
-                  <div className="card h-100 shadow-sm product-card">
-                    <div
-                      className="product-image-wrapper"
-                      onClick={() => {
-                        const existingOrder = orderList.find(
-                          (order) => order.item_id === item.item_id
-                        );
-                        if (existingOrder) {
-                          onRemove(item);
-                        } else {
-                          onAdd(item);
-                        }
-                      }}
-                      style={{ position: "relative", cursor: "pointer" }}
-                    >
-                      <img
-                        src={`http://localhost:8000/storage/${
-                          item.item_image || "Images/placeholder.png"
-                        }`}
-                        alt={item.item_name}
-                        className="card-img-top product-image"
-                      />
-                      {selectedItemId === item.item_id && (
-                        <div
-                          ref={selectedItemRef}
-                          className="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 p-2 rounded d-flex justify-content-center align-items-center z-2 text-white"
-                        >
-                          Selected
-                        </div>
-                      )}
-                    </div>
-                    <div className="card-body d-flex flex-column">
-                      <h6
-                        className="card-title product-title"
-                        title={item.item_name}
+            <>
+              <div className="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4 py-3">
+                {state.filteredItems.map((item) => (
+                  <div className="col" key={item.item_id}>
+                    <div className="card h-100 shadow-sm product-card">
+                      <div
+                        className="product-image-wrapper"
+                        onClick={() => {
+                          const existingOrder = orderList.find(
+                            (order) => order.item_id === item.item_id
+                          );
+                          if (existingOrder) {
+                            onRemove(item);
+                          } else {
+                            onAdd(item);
+                          }
+                        }}
+                        style={{ position: "relative", cursor: "pointer" }}
                       >
-                        {item.item_name}
-                      </h6>
-                      <p className="card-text product-description flex-grow-1">
-                        {item.item_description}
-                      </p>
-                      <p className="card-text product-price">
-                        <strong>
-                          ₱{Number(item.item_price).toLocaleString()}
-                        </strong>
-                      </p>
+                        <img
+                          src={`http://localhost:8000/storage/${
+                            item.item_image || "Images/placeholder.png"
+                          }`}
+                          alt={item.item_name}
+                          className="card-img-top product-image"
+                        />
+                        {selectedItemId === item.item_id && (
+                          <div
+                            ref={selectedItemRef}
+                            className="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 p-2 rounded d-flex justify-content-center align-items-center z-2 text-white"
+                          >
+                            Selected
+                          </div>
+                        )}
+                      </div>
+                      <div className="card-body d-flex flex-column">
+                        <h6
+                          className="card-title product-title"
+                          title={item.item_name}
+                        >
+                          {item.item_name}
+                        </h6>
+                        <p className="card-text product-description flex-grow-1">
+                          {item.item_description}
+                        </p>
+                        <p className="card-text product-price">
+                          <strong>
+                            ₱{Number(item.item_price).toLocaleString()}
+                          </strong>
+                        </p>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Load More button */}
+              {hasMore && (
+                <div className="text-center my-3">
+                  <button
+                    className="btn btn-primary"
+                    onClick={loadMoreItems}
+                    disabled={state.loadingItems}
+                  >
+                    {state.loadingItems ? "Loading..." : "Load More"}
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="py-3 text-center">No Items Found</div>
           )}

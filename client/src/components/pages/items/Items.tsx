@@ -1,3 +1,4 @@
+// Tibor_pos_system\client\src\components\pages\items\Items.tsx
 import { useState, useEffect } from "react";
 import type { Items } from "../../../interfaces/Item/Items";
 import ItemsTable from "../../table/item/ItemTable";
@@ -8,11 +9,14 @@ import DeleteItemModal from "../../modals/item/DeleteItemModal";
 import ItemAlert from "../../forms/alert/ItemAlert";
 import ItemService from "../../../services/ItemService";
 import ErrorHandler from "../../handler/ErrorHandler";
+import { Button } from "antd";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 
 const ItemsPage = () => {
   const [refreshItems, setRefreshItems] = useState(false);
   const [items, setItems] = useState<Items[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -80,6 +84,10 @@ const ItemsPage = () => {
     setOpenDeleteItemModal(false);
   };
 
+  const toggleAlertVisibility = () => {
+    setShowAlert(!showAlert);
+  };
+
   const lowStockItems = items.filter((item) => item.item_quantity < 100);
 
   const content = (
@@ -106,15 +114,26 @@ const ItemsPage = () => {
         onClose={handleCloseDeleteItemModal}
       />
 
+      {/* Alert Toggle Button */}
       <div
         style={{
+          marginBottom: "1rem",
           display: "flex",
-          gap: "2rem",
-          alignItems: "stretch",
-          marginTop: "2rem",
+          justifyContent: "flex-end",
         }}
       >
-        {/* Left: ItemAlert Card */}
+        <Button
+          type="text"
+          icon={showAlert ? <UpOutlined /> : <DownOutlined />}
+          onClick={toggleAlertVisibility}
+          style={{ padding: "4px 0" }}
+        >
+          {showAlert ? "Hide Alerts" : "Show Alerts"}
+        </Button>
+      </div>
+
+      {/* Alert Section */}
+      {showAlert && (
         <div
           style={{
             background: "#fff",
@@ -122,12 +141,7 @@ const ItemsPage = () => {
             border: "1px solid #e0e0e0",
             padding: "20px 24px",
             boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            minWidth: "320px",
-            maxWidth: "380px",
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
+            marginBottom: "2rem",
           }}
         >
           <h5 style={{ fontSize: "1.1rem", marginBottom: 16, fontWeight: 600 }}>
@@ -135,18 +149,19 @@ const ItemsPage = () => {
           </h5>
           <ItemAlert lowStockItems={lowStockItems} loading={loadingItems} />
         </div>
+      )}
 
-        {/* Right: Items Table */}
-        <div style={{ flex: 1 }}>
-          <ItemsTable
-            loadingItems={loadingItems}
-            items={items}
-            hasMore={hasMore}
-            loadMoreItems={loadMoreItems}
-            onEditItem={handleOpenEditItemModal}
-            onDeleteItem={handleOpenDeleteItemModal}
-          />
-        </div>
+      {/* Items Table */}
+      <div style={{ background: "#fff", borderRadius: 12, padding: 24 }}>
+        <ItemsTable
+          loadingItems={loadingItems}
+          items={items}
+          hasMore={hasMore}
+          loadMoreItems={loadMoreItems}
+          onEditItem={handleOpenEditItemModal}
+          onDeleteItem={handleOpenDeleteItemModal}
+          refreshTable={() => setRefreshItems(!refreshItems)}
+        />
       </div>
     </>
   );

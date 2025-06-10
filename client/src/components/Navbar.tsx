@@ -57,19 +57,9 @@ const Navbar = () => {
       ] /*, icon: <FaShoppingCart />*/,
     },
     {
-      route: "/charts",
-      title: "Charts",
-      allowedRoles: ["administrator", "manager"] /*, icon: <FaChartBar />*/,
-    },
-    {
       route: "/reports",
       title: "Reports",
       allowedRoles: ["administrator", "manager"] /*, icon: <FaFileAlt />*/,
-    },
-    {
-      route: "/feedback",
-      title: "Feedback",
-      allowedRoles: ["administrator", "manager"] /*, icon: <FaComment />*/,
     },
   ];
 

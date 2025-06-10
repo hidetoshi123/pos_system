@@ -3,107 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Item;
-use App\Models\Order;
-use App\Models\Order_Item;
-use Carbon\Carbon;
-use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function salesReport(Request $request)
+    public function itemSales(Request $request)
     {
-        try {
-            $startDate = $request->query('start_date') ? Carbon::parse($request->query('start_date')) : now()->startOfMonth();
-            $endDate = $request->query('end_date') ? Carbon::parse($request->query('end_date')) : now();
+        $startDate = $request->query('start_date', Carbon::now()->subMonth()->toDateString());
+        $endDate = $request->query('end_date', Carbon::now()->toDateString());
 
-            $totalSales = DB::table('tbl_orders')
-                ->join('tbl_order_items', 'tbl_orders.order_id', '=', 'tbl_order_items.order_id')
-                ->whereBetween('tbl_orders.created_at', [$startDate, $endDate])
-                ->select(DB::raw('SUM(tbl_order_items.quantity * tbl_order_items.price) as total_sales'))
-                ->value('total_sales');
+        $sales = DB::table('tbl_order_items')
+            ->join('tbl_items', 'tbl_order_items.item_id', '=', 'tbl_items.item_id')
+            ->join('tbl_orders', 'tbl_order_items.order_id', '=', 'tbl_orders.order_id')
+            ->select(
+                'tbl_items.item_name',
+                DB::raw('SUM(tbl_order_items.quantity) as total_quantity'),
+                DB::raw('SUM(tbl_order_items.quantity * tbl_order_items.discounted_price) as total_sales')
+            )
+            ->whereBetween('tbl_orders.created_at', [$startDate, $endDate])
+            ->groupBy('tbl_items.item_name')
+            ->orderByDesc('total_sales')
+            ->get();
 
-            // 1. Get total quantities per day
-            $dailySalesSummary = DB::table('tbl_orders')
-                ->join('tbl_order_items', 'tbl_orders.order_id', '=', 'tbl_order_items.order_id')
-                ->whereBetween('tbl_orders.created_at', [$startDate, $endDate])
-                ->select(DB::raw('DATE(tbl_orders.created_at) as sale_date'), DB::raw('SUM(tbl_order_items.quantity) as total_quantity'))
-                ->groupBy('sale_date')
-                ->orderBy('sale_date')
-                ->get();
-
-            // 2. Get item-level sales grouped by day and item
-            $dailyItems = DB::table('tbl_orders')
-                ->join('tbl_order_items', 'tbl_orders.order_id', '=', 'tbl_order_items.order_id')
-                ->join('tbl_items', 'tbl_order_items.item_id', '=', 'tbl_items.item_id')
-                ->whereBetween('tbl_orders.created_at', [$startDate, $endDate])
-                ->select(
-                    DB::raw('DATE(tbl_orders.created_at) as sale_date'),
-                    'tbl_order_items.item_id',
-                    'tbl_items.item_name',
-                    DB::raw('SUM(tbl_order_items.quantity) as quantity_sold')
-                )
-                ->groupBy('sale_date', 'tbl_order_items.item_id', 'tbl_items.item_name')
-                ->orderBy('sale_date')
-                ->get();
-
-            // Organize items by sale_date
-            $itemsGroupedByDate = [];
-            foreach ($dailyItems as $item) {
-                $date = $item->sale_date;
-                if (!isset($itemsGroupedByDate[$date])) {
-                    $itemsGroupedByDate[$date] = [];
-                }
-                $itemsGroupedByDate[$date][] = [
-                    'item_id' => $item->item_id,
-                    'item_name' => $item->item_name,
-                    'quantity_sold' => (int) $item->quantity_sold,
-                ];
-            }
-
-            // Combine summary and items
-            $dailySales = $dailySalesSummary->map(function ($day) use ($itemsGroupedByDate) {
-                return [
-                    'sale_date' => $day->sale_date,
-                    'total_quantity' => (int) $day->total_quantity,
-                    'items' => $itemsGroupedByDate[$day->sale_date] ?? [],
-                ];
-            });
-
-            return response()->json([
-                'totalSales' => $totalSales,
-                'dailySales' => $dailySales,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Sales report error: ' . $e->getMessage());
-            return response()->json(['error' => 'Internal Server Error'], 500);
-        }
-    }
-
-
-
-    public function inventoryReport()
-    {
-        try {
-            $items = Item::select('item_id', 'item_name', 'item_quantity', 'item_price')->get();
-
-            // Filter items with low stock (quantity less than 100)
-            $lowStockItems = $items->filter(fn($item) => $item->item_quantity < 100);
-
-            // Calculate total inventory value (sum of quantity * price)
-            $totalInventoryValue = $items->reduce(function ($carry, $item) {
-                return $carry + ($item->item_quantity * $item->item_price);
-            }, 0);
-
-            return response()->json([
-                'items' => $items,
-                'lowStockItems' => $lowStockItems->values(), // reset keys
-                'totalInventoryValue' => $totalInventoryValue,
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Inventory report error: ' . $e->getMessage());
-            return response()->json(['error' => 'Internal Server Error'], 500);
-        }
+        return response()->json($sales);
     }
 }

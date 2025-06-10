@@ -75,26 +75,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/charts",
-    element: (
-      <ProtectedRoute allowedRoles={["manager", "administrator"]}>
-        <ChartPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/reports",
     element: (
       <ProtectedRoute allowedRoles={["manager", "administrator"]}>
         <ReportPage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/feedback",
-    element: (
-      <ProtectedRoute allowedRoles={["manager", "administrator"]}>
-        <FeedbackPage />
       </ProtectedRoute>
     ),
   },

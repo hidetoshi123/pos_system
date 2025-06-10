@@ -9,7 +9,7 @@ class Order extends Model
 {
     protected $table = 'tbl_orders'; // if not already set
     protected $primaryKey = 'order_id'; // important!
-    public $timestamps = false; // if your table doesn't have created_at, updated_at
+    public $timestamps = true;
 
     protected $fillable = [
         'customer_email',

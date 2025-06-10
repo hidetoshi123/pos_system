@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -20,6 +21,7 @@ class OrderController extends Controller
             'last_name' => 'required|string|max:255',
             'orderItems' => 'required|array|min:1',
             'orderItems.*.item_id' => 'required|integer|exists:tbl_items,item_id',
+
             'orderItems.*.quantity' => 'required|integer|min:1',
             'orderItems.*.discounted_price' => 'required|numeric|min:0',
         ]);
@@ -43,6 +45,8 @@ class OrderController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'total_price' => $grandTotal,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]);
 
             foreach ($request->orderItems as $item) {
@@ -51,18 +55,19 @@ class OrderController extends Controller
                     'item_id' => $item['item_id'],
                     'quantity' => $item['quantity'],
                     'discounted_price' => $item['discounted_price'],
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
                 ]);
             }
 
             DB::commit();
 
-            // Call Make.com webhook after commit
-            Http::post(env('MAKE_WEBHOOK_URL'), [
-                'grand_total' => $grandTotal,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'customer_email' => $request->customer_email,
-            ]);
+            // Http::post(config('services.webhook.url'), [
+            //     'grand_total' => $grandTotal,
+            //     'first_name' => $request->first_name,
+            //     'last_name' => $request->last_name,
+            //     'customer_email' => $request->customer_email,
+            // ]);
 
             return response()->json([
                 'message' => 'Order created successfully!',

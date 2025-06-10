@@ -91,7 +91,7 @@ const ProductsTable = ({
                     <td>
                       <div className="py-4 d-flex justify-content-center align-items-center">
                         <img
-                          src={`/storage/${item.item_image}`}
+                          src={`http://localhost:8000/storage/${item.item_image}`}
                           alt={item.item_name}
                           width="80"
                           height="80"

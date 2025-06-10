@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('customer_email', 100);
             $table->string('first_name', 255);
             $table->string('last_name', 255);
+            $table->decimal('total_price', 8, 2);
             $table->timestamps();
         });
     }

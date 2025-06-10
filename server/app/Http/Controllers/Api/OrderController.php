@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order_Item;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
-use DB;
+use App\Models\Order_Item;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -19,7 +20,6 @@ class OrderController extends Controller
             'last_name' => 'required|string|max:255',
             'orderItems' => 'required|array|min:1',
             'orderItems.*.item_id' => 'required|integer|exists:tbl_items,item_id',
-
             'orderItems.*.quantity' => 'required|integer|min:1',
             'orderItems.*.discounted_price' => 'required|numeric|min:0',
         ]);
@@ -56,11 +56,20 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // Call Make.com webhook after commit
+            Http::post(env('MAKE_WEBHOOK_URL'), [
+                'grand_total' => $grandTotal,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'customer_email' => $request->customer_email,
+            ]);
+
             return response()->json([
                 'message' => 'Order created successfully!',
                 'order_id' => $order->order_id,
                 'grand_total_saved' => $grandTotal,
             ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
 

@@ -1,7 +1,9 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ReceiptPage = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // ✅ Add this
+
   const {
     order_id,
     customer_email,
@@ -71,6 +73,19 @@ const ReceiptPage = () => {
       <h4 style={{ marginTop: "20px" }}>
         Grand Total: ${grandTotal?.toFixed(2)}
       </h4>
+
+      {/* ✅ Add Back button */}
+      <button
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          fontSize: "1rem",
+          cursor: "pointer",
+        }}
+        onClick={() => navigate(-1)} // Go back to previous page
+      >
+        Go Back
+      </button>
     </div>
   );
 };

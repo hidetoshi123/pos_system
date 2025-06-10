@@ -7,11 +7,11 @@ import CategoriesPage from "./components/pages/itemCategory/ItemCategory";
 import EditItemCategory from "./components/pages/itemCategory/EditItemCategory";
 import DeleteCategory from "./components/pages/itemCategory/DeleteItemCategory";
 import ItemsPage from "./components/pages/items/Items";
-import ProductPage from "./components/pages/product/productPage";
 import ReceiptPage from "./components/pages/receipt/ReceiptPage";
 import ChartPage from "./components/pages/chart/Chart";
 import ReportPage from "./components/pages/report/report";
 import FeedbackPage from "./components/pages/feedback/feedback";
+import ProductsPage from "./components/pages/product/productPage";
 
 const router = createBrowserRouter([
   {
@@ -62,7 +62,7 @@ const router = createBrowserRouter([
     path: "/products",
     element: (
       <ProtectedRoute allowedRoles={["cashier", "manager", "administrator"]}>
-        <ProductPage />
+        <ProductsPage />
       </ProtectedRoute>
     ),
   },

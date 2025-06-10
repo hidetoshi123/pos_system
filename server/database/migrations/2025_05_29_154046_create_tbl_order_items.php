@@ -11,14 +11,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('tbl_order_items', function (Blueprint $table) {
-            $table->id();
+            $table->id(); // Default 'id' primary key for order_items table
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('item_id');
             $table->integer('quantity')->default(1);
-            $table->decimal('price', 8, 2); // price per item at time of order
+            $table->decimal('discounted_price', 8, 2);
             $table->timestamps();
 
+            // Foreign key constraints
             $table->foreign('order_id')->references('order_id')->on('tbl_orders')->onDelete('cascade');
+            // References 'item_id' on 'tbl_items' as confirmed by your tbl_items migration
             $table->foreign('item_id')->references('item_id')->on('tbl_items')->onDelete('cascade');
         });
 

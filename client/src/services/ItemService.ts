@@ -1,15 +1,16 @@
 import AxiosInstance from "../AxiosInstance";
 
 const ItemService = {
-  loadItems: async ({ page = 1 }) => {
+  loadItems: async ({ page = 1, per_page = 5 }) => {
     return AxiosInstance.get("/loadItems", {
-      params: { page },
+      params: { page, per_page },
     })
       .then((response) => response)
       .catch((error) => {
         throw error;
       });
-  },  
+  },
+  
 
   storeItem: async (data: FormData) => {
     return AxiosInstance.post("/storeItem", data, {

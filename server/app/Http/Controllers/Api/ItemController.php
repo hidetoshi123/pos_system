@@ -11,7 +11,8 @@ class ItemController extends Controller
 {
     public function loadItems(Request $request)
     {
-        $perPage = 10;
+        // Allow per_page to be passed from frontend, fallback to 10
+        $perPage = $request->input('per_page', 5);
 
         $items = Item::with('category')
             ->where('is_deleted', 0)
@@ -19,6 +20,7 @@ class ItemController extends Controller
 
         return response()->json($items, 200);
     }
+
 
 
 

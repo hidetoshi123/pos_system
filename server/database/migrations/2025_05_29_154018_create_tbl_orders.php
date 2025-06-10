@@ -11,10 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('tbl_orders', function (Blueprint $table) {
-            $table->id('order_id');
+            $table->id('order_id'); // Using id('order_id') to specify the primary key name
             $table->string('customer_email', 100);
             $table->string('first_name', 255);
             $table->string('last_name', 255);
+            $table->decimal('total_price', 10, 2); // Stores the grand total of the order
             $table->timestamps();
         });
     }

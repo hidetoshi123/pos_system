@@ -2,25 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    protected $table = 'tbl_orders';
-    protected $primaryKey = 'order_id';
-    public $timestamps = true;
+    protected $table = 'tbl_orders'; // if not already set
+    protected $primaryKey = 'order_id'; // important!
+    public $timestamps = false; // if your table doesn't have created_at, updated_at
 
     protected $fillable = [
         'customer_email',
         'first_name',
         'last_name',
-
+        'total_price',
+        'order_date',
     ];
-
-    public function items()
-    {
-        return $this->belongsToMany(Item::class, 'tbl_order_items', 'order_id', 'item_id')
-            ->withPivot('quantity', 'price')
-            ->withTimestamps();
-    }
 }

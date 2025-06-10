@@ -8,22 +8,21 @@ const MainLayout = ({ content }: MainLayoutProps) => {
   return (
     <div
       style={{
+        display: "flex",
         backgroundColor: "#f8f9fa",
         minHeight: "100vh",
-        paddingTop: "80px", // to account for fixed navbar
-        display: "flex",
-        flexDirection: "column",
       }}
     >
       <Navbar />
 
       <main
         style={{
-          backgroundColor: "#f8f9fa",
-          minHeight: "100vh",
-          paddingTop: "20px",
-          display: "flex",
-          flexDirection: "column",
+          flex: 1, // take remaining space
+          paddingTop: "40px",
+          paddingBottom: "40px",
+          paddingLeft: "300px", // Adjusted to accommodate the fixed-width Navbar (280px + 20px padding/margin)
+          paddingRight: "20px",
+          overflowX: "auto",
         }}
       >
         {content}

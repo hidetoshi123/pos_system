@@ -5,46 +5,71 @@ import { useState } from "react";
 import ErrorHandler from "./handler/ErrorHandler";
 import SpinnerSmall from "./SpinnerSmall";
 
+// Consider using a dedicated icon library (e.g., react-icons)
+// import { FaUsers, FaBox, FaShoppingCart, FaChartBar, FaFileAlt, FaComment } from 'react-icons/fa';
+
 const Navbar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const [loadingLogout, setLoadingLogout] = useState(false);
 
-  const getUserRole = (): string | null => {
+  // Memoize user data if it doesn't change frequently to avoid re-parsing localStorage
+  // This is a simple example, for more robust solutions, use React Context or a global store
+  const getUserData = () => {
     const user = localStorage.getItem("user");
-    const parsedUser = user ? JSON.parse(user) : null;
-    return parsedUser?.role || null;
+    return user ? JSON.parse(user) : null;
   };
 
-  const userRole = getUserRole() || "";
+  const user = getUserData();
+  const userRole = user?.role || "";
+
+  const handleUserFullName = (): string => {
+    let fullName = "";
+    if (user) {
+      if (user.middle_name) {
+        fullName = `${user.last_name}, ${user.first_name} ${user.middle_name[0]}.`;
+      } else {
+        fullName = `${user.last_name}, ${user.first_name}`;
+      }
+    }
+    return fullName;
+  };
 
   const menuItems = [
-    { route: "/users", title: "Users", allowedRoles: ["administrator"] },
+    {
+      route: "/users",
+      title: "Users",
+      allowedRoles: ["administrator"] /*, icon: <FaUsers />*/,
+    },
     {
       route: "/items",
       title: "Items",
-      allowedRoles: ["administrator", "manager"],
+      allowedRoles: ["administrator", "manager"] /*, icon: <FaBox />*/,
     },
     {
       route: "/products",
       title: "Products",
-      allowedRoles: ["administrator", "manager", "cashier"],
+      allowedRoles: [
+        "administrator",
+        "manager",
+        "cashier",
+      ] /*, icon: <FaShoppingCart />*/,
     },
     {
       route: "/charts",
       title: "Charts",
-      allowedRoles: ["administrator", "manager"],
+      allowedRoles: ["administrator", "manager"] /*, icon: <FaChartBar />*/,
     },
     {
       route: "/reports",
       title: "Reports",
-      allowedRoles: ["administrator", "manager"],
+      allowedRoles: ["administrator", "manager"] /*, icon: <FaFileAlt />*/,
     },
     {
       route: "/feedback",
       title: "Feedback",
-      allowedRoles: ["administrator", "manager"],
+      allowedRoles: ["administrator", "manager"] /*, icon: <FaComment />*/,
     },
   ];
 
@@ -56,114 +81,110 @@ const Navbar = () => {
     e.preventDefault();
     setLoadingLogout(true);
     logout()
-      .then(() => navigate("/"))
+      .then(() => {
+        navigate("/");
+      })
       .catch((error) => ErrorHandler(error, null))
       .finally(() => setLoadingLogout(false));
   };
 
-  const handleUserFullName = () => {
-    const user = localStorage.getItem("user");
-    const parsedUser = user ? JSON.parse(user) : null;
-    let fullName = "";
-    if (parsedUser?.middle_name) {
-      fullName = `${parsedUser.last_name}, ${parsedUser.first_name} ${parsedUser.middle_name[0]}.`;
-    } else if (parsedUser) {
-      fullName = `${parsedUser.last_name}, ${parsedUser.first_name}`;
-    }
-    return fullName;
-  };
-
   return (
-    <nav
-      className="d-flex align-items-center justify-content-between mb-3"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 48px",
-        height: "80px",
-        position: "fixed",
-        top: 0,
-        width: "100%",
-        backgroundColor: "#1a1a1a",
-        borderBottom: "1px solid #333",
-        zIndex: 1000,
-      }}
-    >
-      <ul style={{ display: "flex", listStyle: "none", margin: 0, padding: 0 }}>
-        <img
-          src="src/assets/images/techfour.jpg"
-          alt="Logo"
-          style={{
-            width: "48px",
-            height: "48px",
-            marginRight: "12px",
-            borderRadius: "8px",
-          }}
-        />
-        <span
-          style={{
-            color: "#fff",
-            fontSize: "1.8rem",
-            fontWeight: "bold",
-            letterSpacing: "1px",
-          }}
-        >
-          TechFour
-        </span>
+    <>
+      <nav // Use <nav> for semantic correctness
+        className="d-flex flex-column"
+        style={{
+          width: "280px",
+          height: "100vh",
+          position: "fixed",
+          left: 0,
+          top: 0,
+          backgroundColor: "#1a1a1a",
+          color: "#fff",
+          padding: "24px 16px",
+          boxShadow: "2px 0 10px rgba(0,0,0,0.2)",
+          zIndex: 1000,
+        }}
+      >
+        <div className="d-flex align-items-center mb-5">
+          <img
+            src="src/assets/images/techfour.jpg"
+            alt="Logo"
+            style={{ width: "48px", height: "48px", marginRight: "12px" }}
+          />
+          <span
+            className="navbar-brand mb-0"
+            style={{ color: "#fff", fontWeight: "bold", fontSize: "1.5rem" }}
+          >
+            TechFour
+          </span>
+        </div>
 
-        {accessibleMenuItems.map((menuItem, index) => (
-          <li className="nav-item" key={index}>
+        <div className="mb-4">
+          <div
+            className="text-center mb-3 p-2"
+            style={{ backgroundColor: "#2c2c2c", borderRadius: "8px" }}
+          >
+            <strong style={{ fontSize: "1rem" }}>{handleUserFullName()}</strong>
+            {userRole && (
+              <div style={{ fontSize: "0.9rem", color: "#ccc" }}>
+                ({userRole.charAt(0).toUpperCase() + userRole.slice(1)})
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-grow-1">
+          {accessibleMenuItems.map((menuItem) => (
             <Link
-              className="nav-link"
+              key={menuItem.route} // Use route as key if unique, or a proper ID
               to={menuItem.route}
+              className="d-block text-decoration-none mb-3"
               style={{
-                padding: "10px 24px",
-                backgroundColor: "#2c2c2c",
-                borderRadius: "6px",
                 color: "#fff",
+                backgroundColor: "#2c2c2c",
+                borderRadius: "8px",
+                padding: "14px 16px",
                 fontWeight: 500,
-                fontSize: "1rem",
-                textDecoration: "none",
-                transition: "background-color 0.2s",
+                fontSize: "1.1rem",
+                transition: "all 0.2s",
+                borderLeft: "4px solid #4a90e2",
+                display: "flex",
+                alignItems: "center",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#444")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2c2c2c")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#3c3c3c";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#2c2c2c";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
             >
+              {/* {menuItem.icon} */} {/* Uncomment and add icons */}
+              <span style={{ marginRight: "12px", fontSize: "1.2rem" }}></span>
               {menuItem.title}
             </Link>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
 
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <strong
-          style={{ color: "#fff", marginRight: "12px", fontSize: "1rem" }}
-        >
-          {handleUserFullName()}
-        </strong>
         <button
           type="button"
-          style={{
-            padding: "8px 16px",
-            borderRadius: "6px",
-            border: "1px solid #fff",
-            backgroundColor: "transparent",
-            color: "#fff",
-            cursor: "pointer",
-            fontSize: "1rem",
-            transition: "background-color 0.2s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fff")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
+          className="btn btn-danger mt-auto"
           onClick={handleLogout}
           disabled={loadingLogout}
+          style={{
+            padding: "14px",
+            borderRadius: "8px",
+            fontSize: "1.1rem",
+            fontWeight: "bold",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.02)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
         >
           {loadingLogout ? (
             <>
@@ -173,8 +194,8 @@ const Navbar = () => {
             "Logout"
           )}
         </button>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

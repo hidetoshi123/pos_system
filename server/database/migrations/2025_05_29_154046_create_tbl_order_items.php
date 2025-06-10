@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('item_id');
             $table->integer('quantity')->default(1);
-            $table->decimal('discounted_price', 8, 2);
+            $table->decimal('price', 8, 2); // price per item at time of order
             $table->timestamps();
 
             $table->foreign('order_id')->references('order_id')->on('tbl_orders')->onDelete('cascade');

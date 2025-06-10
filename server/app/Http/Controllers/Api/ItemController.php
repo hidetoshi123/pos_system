@@ -11,7 +11,7 @@ class ItemController extends Controller
 {
     public function loadItems(Request $request)
     {
-        $perPage = $request->get('per_page', 5);
+        $perPage = 10;
 
         $items = Item::with('category')
             ->where('is_deleted', 0)
@@ -19,7 +19,6 @@ class ItemController extends Controller
 
         return response()->json($items, 200);
     }
-
 
 
 

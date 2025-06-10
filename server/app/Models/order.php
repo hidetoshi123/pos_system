@@ -14,7 +14,7 @@ class Order extends Model
         'customer_email',
         'first_name',
         'last_name',
-        'total_price'
+
     ];
 
     public function items()

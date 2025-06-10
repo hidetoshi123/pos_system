@@ -6,5 +6,5 @@ export interface OrderItem {
     item_id: number;    
     item: Items;           
     quantity: number;
-    discounted_price: number;
+    price: number;
   }

@@ -1,112 +1,131 @@
 import { useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import OrderForm from "../../forms/orders/OrderForm";
+import AddOrderForm from "../../forms/orders/AddOrderForm";
+import ProductsTable from "./product";
+import AlertMessage from "../../AlertMessage";
 import type { Items } from "../../../interfaces/Item/Items";
 import type { OrderItem } from "../../../interfaces/order_item/order_item";
-import ProductsTable from "./product";
+import { useNavigate } from "react-router-dom";
 
-const ProductsPage = () => {
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+const ProductPage = () => {
+  const [refreshItems, setRefreshOrder] = useState(false);
+  const [orderList, setOrderList] = useState<OrderItem[]>([]);
+  const [itemList] = useState<Items[]>([]);
 
-  const handleItemSelect = (item: Items) => {
-    setOrderItems((prevOrderItems) => {
-      const existing = prevOrderItems.find((oi) => oi.item_id === item.item_id);
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleAddToOrder = (item: Items) => {
+    setOrderList((prev) => {
+      const existing = prev.find((order) => order.item_id === item.item_id);
       if (existing) {
-        return prevOrderItems.map((oi) =>
-          oi.item_id === item.item_id
-            ? { ...oi, quantity: oi.quantity + 1 }
-            : oi
+        if (existing.quantity >= item.item_quantity) {
+          alert(
+            `Not enough stock for ${item.item_name}. Only ${item.item_quantity} in stock.`
+          );
+          return prev;
+        }
+        return prev.map((order) =>
+          order.item_id === item.item_id
+            ? { ...order, quantity: order.quantity + 1 }
+            : order
         );
-      } else {
-        const newOrderItem: OrderItem = {
-          item_id: item.item_id,
-          item,
-          quantity: 1,
-          discounted_price: item.item_price,
-          // REMOVED: total_price: item.item_price * 1, // This is no longer part of OrderItem
-        };
-        return [...prevOrderItems, newOrderItem];
       }
+
+      if (item.item_quantity < 1) {
+        alert(`No stock available for ${item.item_name}.`);
+        return prev;
+      }
+
+      return [
+        ...prev,
+        {
+          customer_email: "",
+          first_name: "",
+          last_name: "",
+          item_id: item.item_id,
+          quantity: 1,
+          price: item.item_price,
+          item,
+        },
+      ];
     });
   };
 
-  const handleAddItem = (item: Items) => {
-    const discountedPrice =
-      Number(item.item_discount) > 0
-        ? Number(item.item_price) * (1 - Number(item.item_discount) / 100)
-        : Number(item.item_price);
-
-    setOrderItems((prev) => {
-      const existing = prev.find((oi) => oi.item_id === item.item_id);
-      if (existing) {
-        return prev.map((oi) =>
-          oi.item_id === item.item_id
-            ? {
-                ...oi,
-                quantity: oi.quantity + 1,
-                // REMOVED: total_price: discountedPrice * (oi.quantity + 1), // This is no longer part of OrderItem
-              }
-            : oi
-        );
-      } else {
-        const newOrderItem: OrderItem = {
-          item_id: item.item_id,
-          item,
-          quantity: 1,
-          discounted_price: discountedPrice,
-        };
-        return [...prev, newOrderItem];
-      }
-    });
-  };
-
-  const handleRemoveItem = (item: Items) => {
-    setOrderItems((prev) =>
+  const handleRemoveFromOrder = (item: Items) => {
+    setOrderList((prev) =>
       prev
-        .map((oi) =>
-          oi.item_id === item.item_id
-            ? {
-                ...oi,
-                quantity: oi.quantity - 1,
-              }
-            : oi
+        .map((order) =>
+          order.item_id === item.item_id
+            ? { ...order, quantity: order.quantity - 1 }
+            : order
         )
-        .filter((oi) => oi.quantity > 0)
+        .filter((order) => order.quantity > 0)
     );
   };
 
+  const handleShowAlertMessage = (
+    message: string,
+    isSuccess: boolean,
+    isVisible: boolean
+  ) => {
+    setMessage(message);
+    setIsSuccess(isSuccess);
+    setIsVisible(isVisible);
+  };
+
+  const handleCloseAlertMessage = () => {
+    setMessage("");
+    setIsSuccess(false);
+    setIsVisible(false);
+  };
+
   const content = (
-    <div
-      style={{
-        display: "flex",
-        gap: "20px",
-        alignItems: "flex-start",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          minWidth: "1000px",
-        }}
-      >
-        <ProductsTable
-          onItemSelect={handleItemSelect}
-          onIncrease={handleAddItem}
-          onDecrease={handleRemoveItem}
+    <>
+      <div className="py-4">
+        <AlertMessage
+          message={message}
+          isSuccess={isSuccess}
+          isVisible={isVisible}
+          onClose={handleCloseAlertMessage}
         />
+        <div className="row mt-5">
+          {" "}
+          {/* increased top margin */}
+          <AddOrderForm
+            orderList={orderList}
+            itemList={itemList}
+            onAdd={handleAddToOrder}
+            onRemove={handleRemoveFromOrder}
+            onOrderAdded={(msg, order) => {
+              handleShowAlertMessage(msg, true, true);
+              navigate("/receipt", {
+                state: {
+                  order_item: orderList,
+                  order_email: order.customer_email,
+                  first_name: order.first_name,
+                  last_name: order.last_name,
+                },
+              });
+              setRefreshOrder(!refreshItems);
+              setOrderList([]);
+            }}
+          />
+          <ProductsTable
+            refreshItems={refreshItems}
+            orderList={orderList}
+            onAdd={handleAddToOrder}
+            onRemove={handleRemoveFromOrder}
+          />
+        </div>
       </div>
-      <div
-        style={{
-          flex: "0 0 600px",
-        }}
-      >
-        <OrderForm orderItems={orderItems} />
-      </div>
-    </div>
+    </>
   );
 
   return <MainLayout content={content} />;
 };
 
-export default ProductsPage;
+export default ProductPage;

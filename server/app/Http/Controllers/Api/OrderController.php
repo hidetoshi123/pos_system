@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
-use App\Models\Order_Item;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -50,7 +50,7 @@ class OrderController extends Controller
             ]);
 
             foreach ($request->orderItems as $item) {
-                Order_Item::create([
+                OrderItem::create([
                     'order_id' => $order->order_id,
                     'item_id' => $item['item_id'],
                     'quantity' => $item['quantity'],

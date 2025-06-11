@@ -8,7 +8,6 @@ import EditItemCategory from "./components/pages/itemCategory/EditItemCategory";
 import DeleteCategory from "./components/pages/itemCategory/DeleteItemCategory";
 import ItemsPage from "./components/pages/items/Items";
 import ReceiptPage from "./components/pages/receipt/ReceiptPage";
-import ChartPage from "./components/pages/chart/Chart";
 import ReportPage from "./components/pages/report/report";
 import FeedbackPage from "./components/pages/feedback/feedback";
 import ProductsPage from "./components/pages/product/productPage";
@@ -79,6 +78,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={["manager", "administrator"]}>
         <ReportPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/feedback",
+    element: (
+      <ProtectedRoute allowedRoles={["manager", "administrator"]}>
+        <FeedbackPage />
       </ProtectedRoute>
     ),
   },

@@ -1,8 +1,8 @@
 import AxiosInstance from "../AxiosInstance";
 
 const ReportService = {
-  itemSaleReport: (params?: { start_date?: string; end_date?: string }) => {
-    return AxiosInstance.get('/report/item-sales', { params });
+  getReport: (params?: { start_date?: string; end_date?: string; group_by?: string }) => {
+    return AxiosInstance.get('/report/itemSaleReport', { params });
   },
 };
 

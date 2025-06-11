@@ -61,6 +61,11 @@ const Navbar = () => {
       title: "Reports",
       allowedRoles: ["administrator", "manager"] /*, icon: <FaFileAlt />*/,
     },
+    {
+      route: "/feedback",
+      title: "Feedback",
+      allowedRoles: ["administrator", "manager"] /*, icon: <FaFileAlt />*/,
+    },
   ];
 
   const accessibleMenuItems = menuItems.filter((item) =>

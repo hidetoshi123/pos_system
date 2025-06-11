@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    use HasFactory;
+
     protected $table = 'tbl_orders'; // if not already set
     protected $primaryKey = 'order_id'; // important!
     public $timestamps = true;
@@ -18,4 +20,5 @@ class Order extends Model
         'total_price',
         'order_date',
     ];
+
 }

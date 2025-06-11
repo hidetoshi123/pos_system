@@ -90,7 +90,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/TopCustomers', 'topSpendingCustomers');
         });
         Route::controller(ReportController::class)->group(function () {
-            Route::get('/report/item-sales', 'itemSales');
+            Route::get('/report/itemSaleReport', 'itemSaleReport');
+
         });
 
 

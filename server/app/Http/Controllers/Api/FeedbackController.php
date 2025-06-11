@@ -11,11 +11,11 @@ class FeedbackController extends Controller
     public function getResponses()
     {
         $client = new Client();
-        $client->setAuthConfig(storage_path('app/GsheetsKey.json')); // Your service account JSON
+        $client->setAuthConfig(storage_path('app/GsheetsKey.json'));
         $client->addScope(Sheets::SPREADSHEETS_READONLY);
 
         $service = new Sheets($client);
-        $spreadsheetId = '1lf77YXjgwJ2Z83tYQPvDjrUc_hZrU7FSOybcnQIKkkk'; // Your Google Sheet ID
+        $spreadsheetId = '1lf77YXjgwJ2Z83tYQPvDjrUc_hZrU7FSOybcnQIKkkk';
         $range = "Form Responses 1!A1:Z1000"; // Adjust as needed
 
         $response = $service->spreadsheets_values->get($spreadsheetId, $range);
